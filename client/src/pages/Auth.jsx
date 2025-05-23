@@ -33,6 +33,8 @@ const Auth = () => {
 
       if (isLogin) {
         login(res.data.token, res.data.user);
+        // after successful login
+        localStorage.setItem("user", JSON.stringify(res.data.user));
         navigate("/dashboard");
       } else {
         alert("Registered successfully. You can now log in.");

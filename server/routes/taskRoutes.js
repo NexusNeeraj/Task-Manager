@@ -11,14 +11,14 @@ const {
   deleteTask,
 } = require("../controllers/taskController");
 
-const { protect } = require("../middleware/authMiddleware");
+const { protect, isAdmin } = require("../middleware/authMiddleware");
 const { downloadDocument } = require("../controllers/taskController");
 
 router.get("/", protect, getTasks);
-router.post("/", protect, upload.array("documents", 3), createTask);
+router.post("/", protect, isAdmin, upload.array("documents", 3), createTask);
 router.get("/:id", protect, getTask);
 router.put("/:id", protect, upload.array("documents", 3), updateTask);
-router.delete("/:id", protect, deleteTask);
+router.delete("/:id", protect, isAdmin, deleteTask);
 router.get("/download/:filePath", protect, downloadDocument);
 
 module.exports = router;

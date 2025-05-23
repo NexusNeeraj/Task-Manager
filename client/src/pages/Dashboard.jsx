@@ -2,13 +2,44 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import TaskForm from "../components/TaskForm";
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [users, setUsers] = useState([]);
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isAdmin = users?.role === "admin";
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/users", {
+        headers: {
+          Authorization: `Bearer ${auth?.token}`,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data.users);
+      })
+      .catch((err) => {
+        setError("Failed to fetch users.");
+      });
+  }, []);
+
+  const handleCreateTask = async (task) => {
+    const formData = new FormData();
+    Object.entries(task).forEach(([key, val]) => {
+      if (key === "documents") {
+        val.forEach((file) => formData.append("documents", file));
+      } else {
+        formData.append(key, val);
+      }
+    });
+  };
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -62,10 +93,22 @@ const Dashboard = () => {
               <p className="text-sm text-gray-600">{task.description}</p>
               <p className="mt-2 text-sm">Status: {task.status}</p>
               <p className="text-sm">Priority: {task.priority}</p>
-              <p className="text-sm">Due: {new Date(task.dueDate).toDateString()}</p>
+              <p className="text-sm">
+                Due: {new Date(task.dueDate).toDateString()}
+              </p>
             </div>
           ))}
         </div>
+      )}
+      {isAdmin ? (
+        <>
+          <h2 className="text-xl font-semibold mb-4">Create New Task</h2>
+          <TaskForm onSubmit={handleCreateTask} users={users} />
+        </>
+      ) : (
+        <p className="text-red-500 font-semibold">
+          Only admins can create and assign tasks.
+        </p>
       )}
     </div>
   );
