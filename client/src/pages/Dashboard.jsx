@@ -13,7 +13,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("user"));
-  const isAdmin = users?.role === "admin";
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     axios
