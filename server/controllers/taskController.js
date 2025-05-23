@@ -1,4 +1,6 @@
 const Task = require("../models/Task");
+const path = require("path");
+const fs = require("fs");
 
 // Create task
 exports.createTask = async (req, res) => {
@@ -84,4 +86,13 @@ exports.deleteTask = async (req, res) => {
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
   }
+};
+
+// Download document
+exports.downloadDocument = (req, res) => {
+  const filePath = path.join(__dirname, "..", req.params.filePath);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ msg: "File not found" });
+  }
+  res.download(filePath);
 };
