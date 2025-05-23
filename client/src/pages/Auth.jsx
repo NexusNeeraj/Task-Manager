@@ -9,6 +9,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [role, setRole] = useState("user");
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -29,13 +30,18 @@ const Auth = () => {
         ? "http://localhost:5000/api/auth/login"
         : "http://localhost:5000/api/auth/register";
 
+      const payload = isLogin ? { email, password } : { email, password, role };
+
       const res = await axios.post(endpoint, { email, password });
 
       if (isLogin) {
-        login(res.data.token, res.data.user);
-        // after successful login
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        navigate("/dashboard");
+        if (res.data?.token && res.data?.user) {
+          login(res.data.token, res.data.user);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+          navigate("/dashboard");
+        } else {
+          setError("Invalid response from server. Please try again.");
+        }
       } else {
         alert("Registered successfully. You can now log in.");
         setIsLogin(true);
@@ -67,7 +73,23 @@ const Auth = () => {
               required
             />
           </div>
-
+          {!isLogin ? (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Role
+              </label>
+              <select
+                className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                required
+                disabled={isLogin}
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          ) : null}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700">
               Password
